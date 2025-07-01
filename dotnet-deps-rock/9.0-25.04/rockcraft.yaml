@@ -1,0 +1,40 @@
+name: dotnet-deps
+build-base: ubuntu@24.04
+base: bare
+version: '9.0'
+summary: The dependencies to run .NET Apps
+description: |
+  Go is an open source programming language that enables the production of
+  simple, efficient and reliable software at scale.
+platforms:
+  amd64:
+  arm64:
+  s390x:
+
+environment:
+  APP_UID: 584792
+  ASPNETCORE_URLS: 'http://+:8080'
+  DOTNET_RUNNING_IN_CONTAINER: 'true'
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 'true'
+
+run-user: _daemon_
+
+parts:
+  deps:
+    plugin: nil
+    override-build: |
+      chisel cut --release ubuntu-25.04 \
+        --root ${CRAFT_PART_INSTALL} \
+        base-files_base \
+        base-files_release-info \
+        base-files_chisel \
+        ca-certificates_data \
+        libbrotli1_libs \
+        libc6_libs \
+        libgcc-s1_libs \
+        libssl3t64_libs \
+        libstdc++6_libs \
+        libunwind8_libs \
+        zlib1g_libs
+
+
