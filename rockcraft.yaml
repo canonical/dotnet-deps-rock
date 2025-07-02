@@ -4,8 +4,9 @@ base: bare
 version: '9.0'
 summary: The dependencies to run .NET Apps
 description: |
-  Go is an open source programming language that enables the production of
-  simple, efficient and reliable software at scale.
+  .NET is a free, cross-platform, open source developer platform for building
+  many different types of applications. This image contains the .NET deps,
+  but does not include bash, the .NET SDK nor a package manager.
 platforms:
   amd64:
   arm64:
