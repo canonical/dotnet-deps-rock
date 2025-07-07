@@ -1,7 +1,13 @@
 summary: test the 'my-rock-name' project
 
 execute: |
-  cd app_helloworld-self-contained/src
-  docker run --rm -v $(pwd):/app ubuntu:25.04 bash -c 'apt update && apt install dotnet-sdk-9.0 -y && cd /app && dotnet publish --self-contained -r linux-x64'
+  case "$(uname -m)" in
+    x86_64) rid="linux-x64" ;;
+    aarch64) rid="linux-arm64" ;;
+    *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+  esac
 
-  docker run --rm -v $(pwd):/app:ro -e PEBBLE_VERBOSE=1 my-rock-name exec /app/bin/Release/net9.0/linux-x64/Hello 
+  cd app_helloworld-self-contained/src
+  docker run --rm -v $(pwd):/app ubuntu:25.04 bash -c "apt update && apt install dotnet-sdk-9.0 -y && cd /app && dotnet publish --self-contained -r $rid"
+
+  docker run --rm -v $(pwd):/app:ro -e PEBBLE_VERBOSE=1 my-rock-name exec /app/bin/Release/net9.0/linux-x64/Hello | grep "Hello, World!"
