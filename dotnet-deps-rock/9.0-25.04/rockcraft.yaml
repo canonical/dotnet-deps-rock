@@ -37,4 +37,10 @@ parts:
         libunwind8_libs \
         zlib1g_libs
 
-
+  deb-security-manifest:
+    after: [deps]
+    plugin: make
+    source: https://github.com/canonical/rocks-security-manifest
+    source-type: git
+    source-branch: main
+    override-prime: gen_manifest
