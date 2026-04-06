@@ -1,0 +1,6 @@
+summary: test dotnet-deps-rock
+
+execute: |
+  docker run --rm -v $(pwd)/src:/app ubuntu:25.04 bash -c "apt update && apt install dotnet-sdk-10.0 -y && cd /app && dotnet publish --self-contained"
+
+  docker run --rm -v $(pwd)/src:/app:ro -e PEBBLE_VERBOSE=1 my-rock-name exec /app/bin/Release/net10.0/linux-x64/Hello | grep "Hello, World!"
