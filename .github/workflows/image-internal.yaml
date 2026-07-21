@@ -7,6 +7,15 @@ name: Reusable Build and Publish Rocks (Internal)
 
 on:
   workflow_call:
+    inputs:
+      rock-repo:
+        description: Repository containing the track to build
+        required: true
+        type: string
+      rock-repo-commit:
+        description: Git ref containing the track to build
+        required: true
+        type: string
 
 jobs:
 
@@ -25,8 +34,11 @@ jobs:
           echo "::error::This workflow is intended for internal repositories only. Please use the .github/workflows/image.yaml workflow instead."
           exit 1
 
-      - name: Checkout Repository
+      - name: Checkout target branch
         uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.rock-repo }}
+          ref: ${{ inputs.rock-repo-commit }}
 
       - name: Read .github/ci.yaml
         id: read-ci-config
@@ -40,8 +52,8 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.build-matrix) }}
     uses: canonical/oci-factory-internal/.github/workflows/Build-Rock.yaml@main
     with:
-      rock-repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-      rock-repo-commit: ${{ github.head_ref || github.ref_name }}
+      rock-repo: ${{ inputs.rock-repo }}
+      rock-repo-commit: ${{ inputs.rock-repo-commit }}
       rockfile-directory: ${{ matrix.directory }}
       oci-archive-name: ${{ matrix.name }}
     secrets:

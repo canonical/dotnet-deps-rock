@@ -2,6 +2,15 @@ name: Reusable Build and Publish Rocks
 
 on:
   workflow_call:
+    inputs:
+      rock-repo:
+        description: Repository containing the track to build
+        required: true
+        type: string
+      rock-repo-commit:
+        description: Git ref containing the track to build
+        required: true
+        type: string
 
 jobs:
   prepare:
@@ -12,8 +21,11 @@ jobs:
       upload-matrix: ${{ steps.read-ci-config.outputs.upload-matrix }}
       arch-map: ${{ steps.set-map.outputs.arch-map }}
     steps:
-      - name: Checkout Repository
+      - name: Checkout target branch
         uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.rock-repo }}
+          ref: ${{ inputs.rock-repo-commit }}
 
       - name: Read .github/ci.yaml
         id: read-ci-config
@@ -50,8 +62,8 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Build-Rock.yaml@main
     with:
-      rock-repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-      rock-repo-commit: ${{ github.head_ref || github.ref_name }}
+      rock-repo: ${{ inputs.rock-repo }}
+      rock-repo-commit: ${{ inputs.rock-repo-commit }}
       rockfile-directory: ${{ matrix.directory }}
       oci-archive-name: ${{ matrix.name }}
       arch-map: ${{ needs.prepare.outputs.arch-map }}
