@@ -1,6 +1,7 @@
-# Rocks template repo
+# dotnet-deps rock
 
-This repository template provides a basic setup to help you get started quickly with developing your own rock.
+This repository contains the `dotnet-deps` rock. Each supported track is
+maintained in its own branch.
 
 ## Table of Contents
 
@@ -10,7 +11,7 @@ This repository template provides a basic setup to help you get started quickly 
 
 ## Setup Instructions
 
-### 1. Start a new repository from this template
+### 1. Repository setup
 
 Check GitHub's documentation on [creating a repository from a template](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template)
 
@@ -28,28 +29,30 @@ Check GitHub's documentation on [creating a repository from a template](https://
 
 This template comes with a basic setup to get you started. Here's what you need to customize:
 
-- **`rockcraft.yaml`**: This is your rock's [recipe](https://documentation.ubuntu.com/rockcraft/en/stable/reference/rockcraft.yaml/)! Adjust its contents, as well as its parent directories' names according to your rock's name and version.
-- **`SECURITY.md.template`**: Edit the template with your repo's details and set the security policy by renaming this file to `SECURITY.md`.
+- **Track branches**: The branch name is the track, for example `9.0-25.04` or `10.0-26.04`.
+- **`rockcraft.yaml`**: Each track branch contains its recipe at the repository root. See the [Rockcraft reference](https://documentation.ubuntu.com/rockcraft/en/stable/reference/rockcraft.yaml/).
+- **`.github/workflows`**: Shared workflow implementations live on `main`. Track branches contain callers that reuse those workflows.
 - **`CODEOWNERS`**: Optional, but recommended. Read more about [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners).
 
 ## Directory Structure
 
-Here's an overview of the directory structure of the repository:
+The `main` branch contains shared repository files and reusable workflows. A
+track branch contains the rock recipe at its root:
 
 ```
-my-rock/                      # Directory containing all versions of a single rock
-   └─ 0.1                     # Directory containing the rock project file for a specific version
-      └─ rockcraft.yaml       # Rock project file
+rockcraft.yaml                # Rock project file for this track
+spread/                       # Track-specific integration tests
 .gitignore
 CODEOWNERS                    
-README.md                     # Top level document containing this specification
-SECURITY.md.template          # Security policy template
+README.md
+SECURITY.md
 ```
 
 ## Building, testing and uploading the Rock
 
-To build, test and upload the rock to GHCR, simply commit your `rockcraft.yaml`
-file and check the GitHub actions.
+To build, test and upload a track, commit changes to its track branch and check
+the GitHub actions. The branch workflows call the reusable workflows from
+`main`.
 
 > [!NOTE]
 > Before committing your `rockcraft.yaml`, it is recommended that you `pack` it

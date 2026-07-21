@@ -1,17 +1,12 @@
-# This workflow is intended for internal Canonical repositories only. 
-# It includes steps that rely on internal actions or secrets, 
-# and it performs additional checks to prevent accidental usage in public repositories. 
-# If you are working in a public repository, please use the .github/workflows/image.yaml workflow instead.
+# This reusable workflow is intended for internal Canonical repositories only.
+# It includes steps that rely on internal actions or secrets, and it performs
+# additional checks to prevent accidental usage in public repositories.
+# If you are working in a public repository, use image.yaml instead.
 #
-name: Build and Publish Rocks (Internal)
+name: Reusable Build and Publish Rocks (Internal)
 
 on:
-  # Uncomment these lines to enable the workflow on push and pull_request events
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
 
@@ -46,9 +41,9 @@ jobs:
     uses: canonical/oci-factory-internal/.github/workflows/Build-Rock.yaml@main
     with:
       rock-repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-      rock-repo-commit: ${{ github.ref }}
+      rock-repo-commit: ${{ github.head_ref || github.ref_name }}
       rockfile-directory: ${{ matrix.directory }}
-      oci-archive-name: ${{ matrix.artifact-name }}
+      oci-archive-name: ${{ matrix.name }}
     secrets:
       host-github-token: ${{ secrets.GITHUB_TOKEN }}
       source-github-token: ${{ secrets.REPO_CLONER_TOKEN }}
@@ -61,7 +56,7 @@ jobs:
       matrix: ${{ fromJson(needs.prepare.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Test-Rock.yaml@main
     with:
-      oci-archive-name: ${{ matrix.artifact-name }}
+      oci-archive-name: ${{ matrix.name }}
 
 
   upload-ghcr:
@@ -69,8 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       needs.prepare.outputs.ghcr-upload == 'true' &&
-      github.event_name != 'pull_request' && 
-      github.ref == 'refs/heads/main'
+      github.event_name != 'pull_request'
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.build-matrix) }}
       fail-fast: false
@@ -80,7 +74,7 @@ jobs:
       - name: Upload Rock to GHCR
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ghcr.io/${{ github.repository }}
@@ -93,8 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       needs.prepare.outputs.upload-matrix != '{"include": []}' &&
-      github.event_name != 'pull_request' && 
-      github.ref == 'refs/heads/main'
+      github.event_name != 'pull_request'
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.upload-matrix) }}
       fail-fast: false
@@ -117,7 +110,7 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         if: ${{ contains(matrix.registry-auth-method, 'ecr') }}
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ${{ matrix.registry-uri }}
@@ -128,10 +121,9 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         if: matrix.registry-auth-method == 'basic'
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ${{ matrix.registry-uri }}
           username: ${{ secrets[matrix.registry-auth-username] }}
           password: ${{ secrets[matrix.registry-auth-password] }}
-

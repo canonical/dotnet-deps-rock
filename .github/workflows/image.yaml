@@ -1,11 +1,7 @@
-name: Build and Publish Rocks
+name: Reusable Build and Publish Rocks
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+  workflow_call:
 
 jobs:
   prepare:
@@ -57,7 +53,7 @@ jobs:
       rock-repo: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
       rock-repo-commit: ${{ github.head_ref || github.ref_name }}
       rockfile-directory: ${{ matrix.directory }}
-      oci-archive-name: ${{ matrix.artifact-name }}
+      oci-archive-name: ${{ matrix.name }}
       arch-map: ${{ needs.prepare.outputs.arch-map }}
       rockcraft-test: ${{ matrix.run-tests }}
       pro-services: ${{ matrix.pro-services }}
@@ -74,7 +70,7 @@ jobs:
       matrix: ${{ fromJSON(needs.prepare.outputs.build-matrix) }}
     uses: canonical/oci-factory/.github/workflows/Test-Rock.yaml@main
     with:
-      oci-archive-name: ${{ matrix.artifact-name }}
+      oci-archive-name: ${{ matrix.name }}
     secrets:
       pro-artifact-passphrase: ${{ secrets[matrix.pro-artifact-passphrase] }}
 
@@ -84,8 +80,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       needs.prepare.outputs.ghcr-upload == 'true' &&
-      github.event_name != 'pull_request' && 
-      github.ref == 'refs/heads/main'
+      github.event_name != 'pull_request'
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.build-matrix) }}
       fail-fast: false
@@ -101,7 +96,7 @@ jobs:
         if: ${{ github.event.repository.visibility != 'public' || matrix.pro-services == '' }}
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ghcr.io/${{ github.repository }}
@@ -115,8 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       needs.prepare.outputs.upload-matrix != '{"include": []}' &&
-      github.event_name != 'pull_request' && 
-      github.ref == 'refs/heads/main'
+      github.event_name != 'pull_request'
     strategy:
       matrix: ${{ fromJSON(needs.prepare.outputs.upload-matrix) }}
       fail-fast: false
@@ -139,7 +133,7 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         if: ${{ contains(matrix.registry-auth-method, 'ecr') }}
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ${{ matrix.registry-uri }}
@@ -151,7 +145,7 @@ jobs:
         uses: canonical/oci-factory/.github/actions/upload-rock@main
         if: matrix.registry-auth-method == 'basic'
         with:
-          artifact_name: ${{ matrix.artifact-name }}
+          artifact_name: ${{ matrix.name }}
           tags: ${{ matrix.tag }}
           name: ${{ matrix.name }}
           registry: ${{ matrix.registry-uri }}

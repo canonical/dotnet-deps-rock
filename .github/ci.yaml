@@ -21,8 +21,7 @@ registries:
   #         username: secrets.AWS_ACCESS_KEY_ID           # @@@@@@ DO NOT PUT ACTUAL CREDENTIALS HERE @@@@@@
   #         password: secrets.AWS_SECRET_ACCESS_KEY       # @@@@@@ DO NOT PUT ACTUAL CREDENTIALS HERE @@@@@@
 
-images:
-  - directory: "dotnet-deps-rock/10.0-26.04"
+images: []
 
   ## Example of specifying different registries for a specific rock
   # - directory: "my-rock-name/0.1-24.04"
