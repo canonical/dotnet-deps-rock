@@ -1,4 +1,4 @@
-summary: test the 'my-rock-name' project
+summary: test the 'dotnet-deps' project
 
 execute: |
   case "$(uname -m)" in
@@ -12,4 +12,4 @@ execute: |
   cd app_helloworld-self-contained/src
   docker run --rm -v $(pwd):/app ubuntu:25.04 bash -c "apt update && apt install dotnet-sdk-9.0 -y && cd /app && dotnet publish --self-contained -r $rid"
 
-  docker run --rm -v $(pwd):/app:ro -e PEBBLE_VERBOSE=1 my-rock-name exec /app/bin/Release/net9.0/linux-x64/Hello | grep "Hello, World!"
+  docker run --rm -v $(pwd):/app:ro -e PEBBLE_VERBOSE=1 dotnet-deps:9.0-25.04 exec /app/bin/Release/net9.0/linux-x64/Hello | grep "Hello, World!"
