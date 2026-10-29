@@ -1,5 +1,6 @@
 name: dotnet-deps
-build-base: ubuntu@26.10
+# TODO: Update once 26.10 is stabilized
+build-base: devel
 base: bare
 version: '10.0'
 summary: The dependencies to run .NET Apps
@@ -24,16 +25,32 @@ run-user: _daemon_
 parts:
   deps:
     plugin: nil
-    stage-packages:
-      - base-files_base
-      - base-files_release-info
-      - base-files_chisel
-      - ca-certificates_data
-      - libc6_libs
-      - libgcc-s1_libs
-      - libssl3t64_libs
-      - libstdc++6_libs
-      - zlib1g_libs
+
+    # TODO: Uncomment once 26.10 is stabilized
+    # stage-packages:
+    #   - base-files_base
+    #   - base-files_release-info
+    #   - base-files_chisel
+    #   - ca-certificates_data
+    #   - libc6_libs
+    #   - libgcc-s1_libs
+    #   - libssl3t64_libs
+    #   - libstdc++6_libs
+    #   - zlib1g_libs
+
+    # TODO: Remove once 26.10 is stabilized
+    override-build: |
+      craftctl default
+      chisel cut --release ubuntu-26.10 --root ${CRAFT_PART_INSTALL} \
+        base-files_base \
+        base-files_release-info \
+        ca-certificates_data \
+        libc6_libs \
+        libgcc-s1_libs \
+        libssl3t64_libs \
+        libstdc++6_libs \
+        zlib1g_libs
+
 
   deb-security-manifest:
     after: [deps]
